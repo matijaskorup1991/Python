@@ -11,6 +11,8 @@ cursor.execute(create_table)
 
 
 user = (1, "matija", "123")
+
+
 insert_query = "INSERT INTO users VALUES (?, ?, ?)"
 
 cursor.execute(insert_query, user)
@@ -19,6 +21,7 @@ users = [
     (2, "matij", "1234"),
     (3, "monika", "12356")
 ]
+
 
 cursor.executemany(insert_query, users)
 
