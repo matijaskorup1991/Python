@@ -1,11 +1,14 @@
 from flask_restful import Resource, reqparse
-import sqlite3
+# import sqlite3
 from models.item import ItemModal
 
 
 class Item(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument("price", type=float, required=True,
+                        help="This field cannot be left blank")
+
+    parser.add_argument("store_id", type=int, required=True,
                         help="This field cannot be left blank")
 
     # @jwt_required
@@ -26,7 +29,7 @@ class Item(Resource):
         #     return {'message': "an item with name '{}' already exists".format(name)}, 400
 
         data = Item.parser.parse_args()
-        item = ItemModal(name, data["price"])
+        item = ItemModal(name, data["price"], data["store_id"])
 
         try:
             item.save_to_db()
@@ -69,7 +72,7 @@ class Item(Resource):
 
         # item = next(filter(lambda x: x["name"] == name, items), None)
         if item is None:
-            item = ItemModal(name, data["price"])
+            item = ItemModal(name, **data)
         else:
             item.price = data["price"]
 
@@ -81,18 +84,4 @@ class Item(Resource):
 class ItemList(Resource):
 
     def get(self):
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
-
-        query = "select * from items"
-
-        result = cursor.execute(query)
-        items = []
-        for row in result:
-            items.append({"name": row[0], "price": row[1]})
-
-        # commit nam treba samo ako nesto spremamo
-        # connection.commit()
-        connection.close()
-
-        return {"items": items}
+        return {"items": [item.json() for item in ItemModal.query.all()], }
